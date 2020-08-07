@@ -152,6 +152,11 @@ async function lookup(msg) {
     let parts = msg.content.split(' ');
     parts.shift();
     let username = parts.join(' ');
+    let isIP = util.isIPv4Address(username) || util.isIPv6Address(username);
+    if (isIP) {
+        msg.channel.send('Cannot lookup an IP.');
+        return;
+    }
     
     // Load a limited set of activity
     let ts_from = '',
@@ -183,6 +188,10 @@ async function check(msg) {
     let parts = msg.content.split(' ');
     parts.shift();
     let username = parts.join(' ');
+    if (isIP) {
+        msg.channel.send('Cannot check an IP.');
+        return;
+    }
 
     let userData = await dlog(username);
     let ipLogs = filterByIP(userData.logs);
