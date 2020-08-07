@@ -21,7 +21,7 @@ const actions = {
     '!lookup': lookup,
     '!check': check,
     '!ping': pong,
-    '!help': help
+    '!gdmhelp': help
 };
 
 const util = {
@@ -188,6 +188,7 @@ async function check(msg) {
     let parts = msg.content.split(' ');
     parts.shift();
     let username = parts.join(' ');
+    let isIP = util.isIPv4Address(username) || util.isIPv6Address(username);
     if (isIP) {
         msg.channel.send('Cannot check an IP.');
         return;
@@ -227,10 +228,11 @@ function pong(msg) {
 
 function help(msg) {
     msg.channel.send(
-           '`!lookup <user>`: Lists wikis where the user has Discussions posts and replies. \n' +
-           '`!check <user>`: Lists alternate accounts of a user based on Discussions activity. \n' +
+           '`!lookup <user>`: Lists wikis where the user has Discussions posts, replies, upvotes, deletes, locks. \n' +
+           '`!check <user>`: Lists alternate accounts (shares the same IPs) based on Discussions activity. \n' +
            '`!ping`: Check if this bot is alive. \n' + 
-           '`!help`: Shows this list of commands.'
+           '`!gdmhelp`: Shows this list of commands. \n' +
+           'Work in progress: planning to reduce !lookup to just posts and replies.'
     );
 }
 
