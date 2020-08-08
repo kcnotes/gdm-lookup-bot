@@ -75,6 +75,21 @@ async function login() {
     });
 }
 
+function cleanUser(user) {
+    // Trim whitespaces and new lines
+    user = user.replace(/^[\s\n]+|[\s\n]+$/g, '');
+    user = user.replace(/^<|>$/g, '');
+    // Clean up links
+    user = user.replace(/^https?:\/\//g, '');
+    user = user.replace(/^.*\.(wikia|fandom|gamepedia)\.(com|org|io)\/(wiki\/)?/g, '');
+    user = user.replace(/^(User:|Special:Contributions\/|Special:Contribs\/)/g, '');
+    // Replace spaces
+    user = user.replace(/(%20|_)/g, ' ');
+    // Uppercase first letter of the username
+    user = user.charAt(0).toUpperCase() + user.slice(1);
+    return user;
+}
+
 async function dlog(username, ts_from) {
     let data = {};
     let isIP = util.isIPv4Address(username) || util.isIPv6Address(username);
@@ -86,20 +101,27 @@ async function dlog(username, ts_from) {
     if (ts_from) {
         data.ts_from = ts_from;
     }
-    console.log(data);
     // Get the data
-    const params = new URLSearchParams(data)
+    const params = new URLSearchParams(data);
     let response = await fetch(SERVICES_DLOG + '?' + params, {
         method: 'GET',
         credentials: 'include',
         headers: {'Content-Type': 'application/json'}
     });
     // Filter out, see UserUtil
-    const resp = await response.json();
+    const resp = await response.text();
+    try {
+        var respJson = JSON.parse(resp);
+    } catch (e) {
+        console.log(resp);
+        return {
+            error: 'Error: invalid username, or connection issue with Fandom'
+        }
+    }
     const filterByType = isIP ? 'ip' : 'userName';
     const filtering = isIP ? 'userName' : 'ip';
     let flags = {};
-    let filteredData = resp.filter(log => {
+    let filteredData = respJson.filter(log => {
         if (flags[log.siteName] && flags[log.siteName][log[filterByType]] === log[filtering]) {
             return false;
         }
@@ -109,8 +131,8 @@ async function dlog(username, ts_from) {
     });
     return {
         logs: filteredData,
-        count: resp.length,
-        ts_from: resp.length === 100 ? resp[resp.length-1].timestamp.replace('T', ' ').replace('Z', '') : null
+        count: respJson.length,
+                ts_from: respJson.length === 100 ? respJson[respJson.length - 1].timestamp.replace('T', ' ').replace('Z', '') : null
     };
 }
 
@@ -152,6 +174,7 @@ async function lookup(msg) {
     let parts = msg.content.split(' ');
     parts.shift();
     let username = parts.join(' ');
+    username = cleanUser(username);
     let isIP = util.isIPv4Address(username) || util.isIPv6Address(username);
     if (isIP) {
         msg.channel.send('Cannot lookup an IP.');
@@ -164,10 +187,13 @@ async function lookup(msg) {
         logs = [];
     while (ts_from != null && logsToLoad > 0) {
         let data = await dlog(username, ts_from);
+        if (data && data.error) {
+            msg.channel.send(data.error);
+            return;
+        }
         logs = logs.concat(filterByWiki(data.logs));
         ts_from = data.ts_from;
         logsToLoad--;
-        console.log(data.ts_from);
     }
     logs = filterByWiki(logs);    
 
@@ -188,6 +214,7 @@ async function check(msg) {
     let parts = msg.content.split(' ');
     parts.shift();
     let username = parts.join(' ');
+    username = cleanUser(username);
     let isIP = util.isIPv4Address(username) || util.isIPv6Address(username);
     if (isIP) {
         msg.channel.send('Cannot check an IP.');
@@ -195,6 +222,10 @@ async function check(msg) {
     }
 
     let userData = await dlog(username);
+    if (userData && userData.error) {
+        msg.channel.send(userData.error);
+        return;
+    }
     let ipLogs = filterByIP(userData.logs);
     let promises = [];
     for (const log of ipLogs) {
