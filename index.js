@@ -263,14 +263,20 @@ function help(msg) {
            '`!check <user>`: Lists alternate accounts (shares the same IPs) based on Discussions activity. \n' +
            '`!ping`: Check if this bot is alive. \n' + 
            '`!gdmhelp`: Shows this list of commands. \n' +
-           'Work in progress: planning to reduce !lookup to just posts and replies.'
+           'Work in progress: planning to reduce !lookup to just posts and replies, and show when device/browser is the same.'
     );
 }
 
 client.on('message', message => {
-    for (const action in actions) {
-        if (message.content.startsWith(action)) {
-            actions[action](message);
+    if (message.channel.id === '741183214386937926' || message.channel.id === '741224570987479060') {
+        for (const action in actions) {
+            if (message.content.startsWith(action)) {
+                actions[action](message);
+            }
         }
+    }
+    if (message.channel.id === '744708572125855785' && message.author.id === '248690852606640128') {
+        const channel = client.channels.cache.get('745636562921979955');
+        channel.send(message.content.toString() + ' (<https://discordapp.com/channels/739438769677139989/744708572125855785/' + message.id + '>)');
     }
 });
