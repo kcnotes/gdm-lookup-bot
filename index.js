@@ -280,6 +280,8 @@ client.on('message', message => {
     if (message.channel.id === '744708572125855785' && message.author.id === '248690852606640128') {
         // q-and-a-library
         const channel = client.channels.cache.get('745636562921979955');
-        channel.send(message.content.toString() + ' (<https://discordapp.com/channels/739438769677139989/744708572125855785/' + message.id + '>)');
+        let msg = message.content.toString();
+        msg = msg.replace(/<@!\d+?>/g, '');
+        channel.send(msg + ' (<https://discordapp.com/channels/739438769677139989/744708572125855785/' + message.id + '>)');
     }
 });
