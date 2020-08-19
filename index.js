@@ -268,6 +268,7 @@ function help(msg) {
 }
 
 client.on('message', message => {
+    // noreply || GDM
     if (message.channel.id === '741183214386937926' || message.channel.id === '741224570987479060') {
         for (const action in actions) {
             if (message.content.startsWith(action)) {
@@ -275,7 +276,9 @@ client.on('message', message => {
             }
         }
     }
+    // talesofarcadia q-and-a && Aaron
     if (message.channel.id === '744708572125855785' && message.author.id === '248690852606640128') {
+        // q-and-a-library
         const channel = client.channels.cache.get('745636562921979955');
         channel.send(message.content.toString() + ' (<https://discordapp.com/channels/739438769677139989/744708572125855785/' + message.id + '>)');
     }
