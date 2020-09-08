@@ -18,7 +18,7 @@ client.once('ready', () => {
 });
 
 const actions = {
-    '!lookup': lookup,
+    '!wikis': wikis,
     '!check': check,
     '!ping': pong,
     '!gdmhelp': help
@@ -170,14 +170,14 @@ function filterByIP(logs) {
     });
 }
 
-async function lookup(msg) {
+async function wikis(msg) {
     let parts = msg.content.split(' ');
     parts.shift();
     let username = parts.join(' ');
     username = cleanUser(username);
     let isIP = util.isIPv4Address(username) || util.isIPv6Address(username);
     if (isIP) {
-        msg.channel.send('Cannot lookup an IP.');
+        msg.channel.send('Cannot lookup the wikis for an IP.');
         return;
     }
     
@@ -262,11 +262,11 @@ function pong(msg) {
 
 function help(msg) {
     msg.channel.send(
-           '`!lookup <user>`: Lists wikis where the user has Discussions posts, replies, upvotes, deletes, locks. \n' +
+           '`!wikis <user>`: Lists wikis where the user has Discussions posts, replies, upvotes, deletes, locks. \n' +
            '`!check <user>`: Lists alternate accounts (shares the same IPs) based on Discussions activity. \n' +
            '`!ping`: Check if this bot is alive. \n' + 
            '`!gdmhelp`: Shows this list of commands. \n' +
-           'Work in progress: planning to reduce !lookup to just posts and replies, and show when device/browser is the same.'
+           'Work in progress: planning to reduce !wikis to just posts and replies, and show when device/browser is the same.'
     );
 }
 
