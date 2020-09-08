@@ -290,8 +290,12 @@ function help(msg) {
 }
 
 client.on('message', message => {
-    // noreply || GDM
-    if (message.channel.id === '741183214386937926' || message.channel.id === '741224570987479060') {
+    let allowedChannelIds = [
+        '741183214386937926', // noreply
+        '741224570987479060', // gdm
+        '752725171269533829'  // xiphos
+    ];
+    if (allowedChannelIds.indexOf(message.channel.id) >= 0) {
         for (const action in actions) {
             if (message.content.startsWith(action)) {
                 actions[action](message);
