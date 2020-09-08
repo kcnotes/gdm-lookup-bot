@@ -237,12 +237,16 @@ async function check(msg) {
     let ipLogs = filterByIP(userData.logs);
     let promises = [];
     let userIpAgents = [];
+    let userIpAppIds = [];
     for (const log of ipLogs) {
         userIpAgents.push(log.userAgent);
+        if (log.appId !== '' && log.appId !== 'opted-out') {
+            userIpAppIds.push(log.appId);
+        }
         promises.push(dlog(log.ip));
     }
-    console.log(userIpAgents);
     var userLogs = [];
+
     Promise.all(promises).then(([...alliplogs]) => {
         for (const iplog of alliplogs) {
             userLogs = userLogs.concat(filterByUsername(iplog.logs, username));
@@ -251,7 +255,10 @@ async function check(msg) {
 
         let users = [];
         userLogs.forEach(log => {
-            if (userIpAgents.indexOf(log.userAgent) >= 0) {
+            if (userIpAppIds.indexOf(log.appId) >= 0) {
+                users.push('• ' + log.userName + ' :exclamation:`App ID match`');
+            }
+            else if (userIpAgents.indexOf(log.userAgent) >= 0) {
                 users.push('• ' + log.userName + ' :exclamation:`device/browser match`');
             } else {
                 users.push('• ' + log.userName);
