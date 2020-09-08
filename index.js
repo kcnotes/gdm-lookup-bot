@@ -203,7 +203,10 @@ async function lookup(msg) {
             wikis.push(' • <https://' + log.siteName + '/f/u/' + log.userId + '>');
         }
     });
-    if (logsToLoad === 0) {
+    if (wikis.length === 0) {
+        msg.channel.send('No wikis found for ' + username + '.');
+    }
+    else if (logsToLoad === 0) {
         msg.channel.send(wikis.join('\n') + '\n(Data from the latest 1000 actions, since ' + ts_from.replace(/ .*/g, '') + ')', {split: true});
     } else {
         msg.channel.send(wikis.join('\n'), {split: true});
@@ -281,7 +284,7 @@ client.on('message', message => {
         // q-and-a-library
         const channel = client.channels.cache.get('745636562921979955');
         let msg = message.content.toString();
-        msg = msg.replace(/<@!\d+?>/g, '');
+        msg = msg.replace(/<@!?\d+?>/g, '');
         channel.send(msg + ' (<https://discordapp.com/channels/739438769677139989/744708572125855785/' + message.id + '>)');
     }
 });
