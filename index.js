@@ -19,6 +19,7 @@ client.once('ready', () => {
 
 const actions = {
     '!wikis': wikis,
+    '!lookup': wikis,
     '!check': check,
     '!ping': pong,
     '!gdmhelp': help
@@ -186,6 +187,10 @@ async function wikis(msg) {
         logsToLoad = 10,
         logs = [];
     while (ts_from != null && logsToLoad > 0) {
+        if (logsToLoad === 9) {
+            // Send an intermediate 'Loading'
+            msg.channel.send('Loading logs... please wait! User has lots of activity!');
+        }
         let data = await dlog(username, ts_from);
         if (data && data.error) {
             msg.channel.send(data.error);
@@ -195,15 +200,15 @@ async function wikis(msg) {
         ts_from = data.ts_from;
         logsToLoad--;
     }
-    logs = filterByWiki(logs);    
+    logs = filterByWiki(logs);
 
     let wikis = [];
     logs.forEach(log => {
         if (log.siteName !== '') {
-            wikis.push(' • <https://' + log.siteName + '/f/u/' + log.userId + '>');
+            wikis.push('• <https://' + log.siteName + '/f/u/' + log.userId + '>');
         }
     });
-    if (wikis.length === 0) {
+    if (logs.length === 0 || wikis.length === 0) {
         msg.channel.send('No wikis found for ' + username + '.');
     }
     else if (logsToLoad === 0) {
@@ -231,9 +236,12 @@ async function check(msg) {
     }
     let ipLogs = filterByIP(userData.logs);
     let promises = [];
+    let userIpAgents = [];
     for (const log of ipLogs) {
+        userIpAgents.push(log.userAgent);
         promises.push(dlog(log.ip));
     }
+    console.log(userIpAgents);
     var userLogs = [];
     Promise.all(promises).then(([...alliplogs]) => {
         for (const iplog of alliplogs) {
@@ -243,7 +251,11 @@ async function check(msg) {
 
         let users = [];
         userLogs.forEach(log => {
-            users.push(' • ' + log.userName);
+            if (userIpAgents.indexOf(log.userAgent) >= 0) {
+                users.push('• ' + log.userName + ' :exclamation:`device/browser match`');
+            } else {
+                users.push('• ' + log.userName);
+            }
         });
         if (users.length == 0) {
             msg.channel.send('No accounts found for ' + username + '.');
