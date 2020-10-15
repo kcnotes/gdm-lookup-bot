@@ -171,6 +171,18 @@ function filterByIP(logs) {
     });
 }
 
+function filterByWikiAndIP(logs, wiki) {
+    let flags = {};
+    return logs.filter(log => {
+        if (log.siteName !== wiki) return false;
+        if (flags[log.ip]) {
+            return false;
+        }
+        flags[log.ip] = true;
+        return true;
+    });
+}
+
 async function wikis(msg) {
     let parts = msg.content.split(' ');
     parts.shift();
@@ -218,13 +230,17 @@ async function wikis(msg) {
     }
 }
 
-async function check(msg) {
+async function check(msg, wiki) {
     let parts = msg.content.split(' ');
     parts.shift();
     let username = parts.join(' ');
     username = cleanUser(username);
     let isIP = util.isIPv4Address(username) || util.isIPv6Address(username);
-    if (isIP) {
+
+    // Allow IP checks only for single wikis
+    if (isIP && !wiki) {
+        msg.channel.send('IP check is not supported yet.');
+    } else if (isIP) {
         msg.channel.send('Cannot check an IP.');
         return;
     }
@@ -234,7 +250,15 @@ async function check(msg) {
         msg.channel.send(userData.error);
         return;
     }
-    let ipLogs = filterByIP(userData.logs);
+
+    // Filter by IP (and per wiki, if required)
+    let ipLogs;
+    if (wiki) {
+        ipLogs = filterByWikiAndIP(userData.logs, wiki);
+    } else {
+        ipLogs = filterByIP(userData.logs);
+    }
+
     let promises = [];
     let userIpAgents = [];
     let userIpAppIds = [];
@@ -256,12 +280,12 @@ async function check(msg) {
         let users = [];
         userLogs.forEach(log => {
             if (userIpAppIds.indexOf(log.appId) >= 0) {
-                users.push('• ' + log.userName + ' :exclamation:`App ID match`');
+                users.push('• ' + log.userName + ' <https://' + log.siteName + '/f/u/' + log.userId + '> :exclamation:`App ID match`');
             }
             else if (userIpAgents.indexOf(log.userAgent) >= 0) {
-                users.push('• ' + log.userName + ' :exclamation:`device/browser match`');
+                users.push('• ' + log.userName + ' <https://' + log.siteName + '/f/u/' + log.userId + '> :exclamation:`device/browser match`');
             } else {
-                users.push('• ' + log.userName);
+                users.push('• ' + log.userName + ' <https://' + log.siteName + '/f/u/' + log.userId + '>');
             }
         });
         if (users.length == 0) {
@@ -285,7 +309,7 @@ function help(msg) {
            '`!check <user>`: Lists alternate accounts (shares the same IPs) based on Discussions activity. \n' +
            '`!ping`: Check if this bot is alive. \n' + 
            '`!gdmhelp`: Shows this list of commands. \n' +
-           'Work in progress: planning to reduce !wikis to just posts and replies, and show when device/browser is the same.'
+           'Work in progress: planning to reduce !wikis to just posts and replies.'
     );
 }
 
@@ -295,10 +319,29 @@ client.on('message', message => {
         '741224570987479060', // gdm
         '752725171269533829'  // xiphos
     ];
+    let singleWikiAllowedChannelIds = [
+        '766444966259851275'
+    ];
+    let singleWikiConfig = {
+        '766444966259851275': {
+            wiki: 'noreply-ucp.fandom.com'
+        }
+    };
+    let singleWikiAllowedActions = ['!check', '!ping', '!gdmhelp'];
+
     if (allowedChannelIds.indexOf(message.channel.id) >= 0) {
         for (const action in actions) {
             if (message.content.startsWith(action)) {
                 actions[action](message);
+            }
+        }
+    }
+    if (singleWikiAllowedChannelIds.indexOf(message.channel.id) >= 0) {
+        for (const action in actions) {
+            if (singleWikiAllowedActions.includes(action)) {
+                if (message.content.startsWith(action)) {
+                    actions[action](message, singleWikiConfig[message.channel.id].wiki);
+                }
             }
         }
     }
