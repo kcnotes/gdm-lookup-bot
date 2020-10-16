@@ -250,26 +250,32 @@ async function check(msg, wiki) {
     username = cleanUser(username);
     let isIP = util.isIPv4Address(username) || util.isIPv6Address(username);
 
-    // Allow IP checks only for single wikis
-    if (isIP && !wiki) {
-        msg.channel.send('IP check is not supported yet.');
+    let ipLogs;
+    if (isIP && wiki) {
+        // Allow IP checks only for single wikis
+        // Hard code a single IP log so that we can dlog the IP
+        ipLogs = [{
+            ip: username,
+            userAgent: 'unknown',
+            appId: ''
+        }];
     } else if (isIP) {
         msg.channel.send('Cannot check an IP.');
         return;
-    }
-
-    let userData = await dlog(username);
-    if (userData && userData.error) {
-        msg.channel.send(userData.error);
-        return;
-    }
-
-    // Filter by IP (and per wiki, if required)
-    let ipLogs;
-    if (wiki) {
-        ipLogs = filterByWikiAndIP(userData.logs, wiki);
     } else {
-        ipLogs = filterByIP(userData.logs);
+        // Get a list of IPs
+        let userData = await dlog(username);
+        if (userData && userData.error) {
+            msg.channel.send(userData.error);
+            return;
+        }
+
+        // Filter by IP (and per wiki, if required)
+        if (wiki) {
+            ipLogs = filterByWikiAndIP(userData.logs, wiki);
+        } else {
+            ipLogs = filterByIP(userData.logs);
+        }
     }
 
     let promises = [];
