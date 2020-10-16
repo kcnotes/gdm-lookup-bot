@@ -117,7 +117,7 @@ async function dlog(username, ts_from) {
         console.log(resp);
         return {
             error: 'Error: invalid username, or connection issue with Fandom'
-        }
+        };
     }
     const filterByType = isIP ? 'ip' : 'userName';
     const filtering = isIP ? 'userName' : 'ip';
@@ -174,11 +174,24 @@ function filterByIP(logs) {
 function filterByWikiAndIP(logs, wiki) {
     let flags = {};
     return logs.filter(log => {
-        if (log.siteName !== wiki) return false;
+        if (wiki && log.siteName !== wiki) return false;
         if (flags[log.ip]) {
             return false;
         }
         flags[log.ip] = true;
+        return true;
+    });
+}
+
+function filterByUsernameAndWiki(logs, originalUsername, wiki) {
+    let flags = {};
+    flags[originalUsername] = true;
+    return logs.filter(log => {
+        if (wiki && log.siteName !== wiki) return false;
+        if (flags[log.userName]) {
+            return false;
+        }
+        flags[log.userName] = true;
         return true;
     });
 }
@@ -273,9 +286,17 @@ async function check(msg, wiki) {
 
     Promise.all(promises).then(([...alliplogs]) => {
         for (const iplog of alliplogs) {
-            userLogs = userLogs.concat(filterByUsername(iplog.logs, username));
+            if (wiki) {
+                userLogs = userLogs.concat(filterByUsernameAndWiki(iplog.logs, username, wiki));
+            } else {
+                userLogs = userLogs.concat(filterByUsername(iplog.logs, username));
+            }
         }
-        userLogs = filterByUsername(userLogs, username);
+        if (wiki) {
+            userLogs = filterByUsernameAndWiki(userLogs, username, wiki);
+        } else {
+            userLogs = filterByUsername(userLogs, username);
+        }
 
         let users = [];
         userLogs.forEach(log => {
@@ -324,7 +345,7 @@ client.on('message', message => {
     ];
     let singleWikiConfig = {
         '766444966259851275': {
-            wiki: 'noreply-ucp.fandom.com'
+            wiki: 'community.fandom.com'
         }
     };
     let singleWikiAllowedActions = ['!check', '!ping', '!gdmhelp'];
