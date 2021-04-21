@@ -1,17 +1,17 @@
 require('dotenv').config();
 const Discord = require('discord.js');
-const nodeFetch = require('node-fetch');
-const fetch = require('fetch-cookie')(nodeFetch);
+const fetch = require('node-fetch');
 
 const BOT_TOKEN = process.env.BOT_TOKEN,
       USERNAME = process.env.FANDOM_USERNAME,
       PASSWORD = process.env.FANDOM_PASSWORD,
+      ACCESS_TOKEN = process.env.ACCESS_TOKEN,
       SERVICES_DLOG = 'https://services.fandom.com/global-discussion-log/logs',
       SERVICES_LOGIN = 'https://services.fandom.com/auth/token',
       client = new Discord.Client();
 
 client.login(BOT_TOKEN);
-login(); // Log in to Fandom
+// login(); // Log in to Fandom
 
 client.once('ready', () => {
     console.log(`Logged in to Discord.`);
@@ -107,7 +107,10 @@ async function dlog(username, ts_from) {
     let response = await fetch(SERVICES_DLOG + '?' + params, {
         method: 'GET',
         credentials: 'include',
-        headers: {'Content-Type': 'application/json'}
+        headers: {
+        	'Content-Type': 'application/json',
+        	'cookie': `access_token=${ACCESS_TOKEN}`
+        }
     });
     // Filter out, see UserUtil
     const resp = await response.text();
@@ -140,6 +143,7 @@ async function dlog(username, ts_from) {
 function filterByWiki(logs) {
     let flags = {};
     return logs.filter(log => {
+    	if (!log.siteName) return false;
         if (flags[log.siteName]) {
             return false;
         }
@@ -152,6 +156,7 @@ function filterByUsername(logs, originalUsername) {
     let flags = {};
     flags[originalUsername] = true;
     return logs.filter(log => {
+    	if (!log.userName) return false;
         if (flags[log.userName]) {
             return false;
         }
@@ -163,6 +168,7 @@ function filterByUsername(logs, originalUsername) {
 function filterByIP(logs) {
     let flags = {};
     return logs.filter(log => {
+    	if (!log.ip) return false;
         if (flags[log.ip]) {
             return false;
         }
@@ -174,6 +180,7 @@ function filterByIP(logs) {
 function filterByWikiAndIP(logs, wiki) {
     let flags = {};
     return logs.filter(log => {
+    	if (!log.ip) return false;
         if (wiki && log.siteName !== wiki) return false;
         if (flags[log.ip]) {
             return false;
@@ -187,6 +194,7 @@ function filterByUsernameAndWiki(logs, originalUsername, wiki) {
     let flags = {};
     flags[originalUsername] = true;
     return logs.filter(log => {
+    	if (!log.userName) return false;
         if (wiki && log.siteName !== wiki) return false;
         if (flags[log.userName]) {
             return false;
