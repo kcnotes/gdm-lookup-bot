@@ -9,8 +9,8 @@
   "author": "Noreplyz",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.2.0",
-    "dotenv": "^8.2.0",
+    "discord.js": "^12.5.3",
+    "dotenv": "^8.6.0",
     "fetch-cookie": "^0.10.1",
     "node-fetch": "^2.6.1"
   }
