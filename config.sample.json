@@ -1,0 +1,9 @@
+{
+  "discord": {
+    "botToken": "abc"
+  },
+  "fandom": {
+    "accessToken": "abc",
+    "serviceEndpoint": "https://services.fandom.com/logs"
+  }
+}

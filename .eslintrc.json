@@ -1,0 +1,72 @@
+{
+    "env": {
+        "es2021": true,
+        "node": true
+    },
+    "root": true,
+    "extends": [
+        "eslint:recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "autofix"
+    ],
+    "rules": {
+        "autofix/no-debugger": "error",
+        "indent": ["error", 2],
+        "no-console": "warn",
+        "no-multi-spaces": ["error"],
+        "no-invalid-this": "error",
+        "block-spacing": ["error", "never"],
+        "brace-style": "error",
+        "comma-dangle": ["error", "always-multiline"],
+        "comma-spacing": "error",
+        "comma-style": "error",
+        "computed-property-spacing": "error",
+        "eol-last": "error",
+        "func-call-spacing": "error",
+        "key-spacing": "error",
+        "keyword-spacing": "error",
+        "linebreak-style": ["error", "windows"],
+        "no-array-constructor": "error",
+        "no-multiple-empty-lines": ["error", {
+            "max": 1
+        }],
+        "no-new-object": "error",
+        "no-tabs": "error",
+        "no-trailing-spaces": "error",
+        "object-curly-spacing": ["error", "always"],
+        "operator-linebreak": ["error", "after"],
+        "padded-blocks": ["error", "never"],
+        "padding-line-between-statements": ["error",
+            { "blankLine": "always", "prev": "*", "next": "multiline-block-like" },
+            { "blankLine": "always", "prev": "multiline-block-like", "next": "*" },
+            { "blankLine": "any", "prev": "*", "next": "if" },
+            { "blankLine": "any", "prev": "if", "next": "*" },
+            { "blankLine": "any", "prev": "*", "next": "while" },
+            { "blankLine": "any", "prev": "while", "next": "*" },
+            { "blankLine": "any", "prev": "*", "next": "for" },
+            { "blankLine": "any", "prev": "for", "next": "*" },
+            { "blankLine": "any", "prev": "*", "next": "try" },
+            { "blankLine": "any", "prev": "try", "next": "*" },
+            { "blankLine": "any", "prev": "*", "next": "switch" },
+            { "blankLine": "any", "prev": "switch", "next": "*" }
+        ],
+        "quotes": ["error", "single", {
+            "allowTemplateLiterals": true
+        }],
+        "semi": "error",
+        "semi-spacing": "error",
+        "space-before-blocks": "error",
+        "space-before-function-paren": ["error", {
+            "asyncArrow": "always",
+            "anonymous": "never",
+            "named": "never"
+        }],
+        "spaced-comment": ["error", "always"],
+        "switch-colon-spacing": "error"
+    }
+}
