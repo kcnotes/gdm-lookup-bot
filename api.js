@@ -60,7 +60,6 @@ const dlog = async (user, tsFrom) => {
   }).then(res => res.text());
 
   try {
-    console.log(res);
     return JSON.parse(res);
   } catch (e) {
     // eslint-disable-next-line no-console
