@@ -79,6 +79,7 @@ async function wikis(msg) {
       msg.channel.sendTyping();
     },
     8,
+    20,
   );
   if (logs.error) {
     if (logs.error.startsWith('Valid')) {
@@ -130,6 +131,7 @@ async function check(msg, wiki) {
     null,
     () => msg.channel.send('Loading logs... please wait! User has lots of activity!'),
     8,
+    20,
   );
   if (userLogs.error) {
     if (userLogs.error.startsWith('Valid')) {
@@ -145,7 +147,7 @@ async function check(msg, wiki) {
   }
 
   const ips = getIPs(userLogs);
-  const promises = ips.filter((ip) => ip !== '').map((ip) => bulkDLog(ip));
+  const promises = ips.filter((ip) => ip !== '').map((ip) => bulkDLog(ip, null, null, 0, 10));
   const ipChecks = await Promise.allSettled(promises);
   const accounts = ipChecks.map((res) => {
     if (wiki) {

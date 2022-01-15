@@ -60,6 +60,7 @@ const dlog = async (user, tsFrom) => {
   }).then(res => res.text());
 
   try {
+    console.log(res);
     return JSON.parse(res);
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -75,11 +76,15 @@ const dlog = async (user, tsFrom) => {
  * @param {*} tsFrom timestamp to start from
  * @param {*} midCallback Callback to be called in the middle of a fetch, if lots of results
  * @param {*} fireMidCallbackCount Number of API calls before firing the midCallback
+ * @param {*} stopAfter Number of API calls to stop after
  * @returns Array of logs
  */
-const bulkDLog = async (user, tsFrom, midCallback, fireMidCallbackCount) => {
+const bulkDLog = async (user, tsFrom, midCallback, fireMidCallbackCount, stopAfter) => {
   if (fireMidCallbackCount === 0) {
     midCallback && midCallback();
+  }
+  if (stopAfter === 0) {
+    return [];
   }
   const res = await dlog(user, tsFrom);
   if (res.error) {
@@ -87,7 +92,7 @@ const bulkDLog = async (user, tsFrom, midCallback, fireMidCallbackCount) => {
   }
   if (Array.isArray(res) && res.length !== 0) {
     const tsFrom = res[res.length - 1].timestamp.replace('T', ' ').replace('Z', '');
-    const bulk = await bulkDLog(user, tsFrom, midCallback, fireMidCallbackCount - 1);
+    const bulk = await bulkDLog(user, tsFrom, midCallback, fireMidCallbackCount - 1, stopAfter - 1);
     return [...res, ...bulk];
   }
   return res;
