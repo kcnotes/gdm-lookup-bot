@@ -55,7 +55,8 @@ const dlog = async (user, tsFrom) => {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'cookie': `access_token=${FANDOM_ACCESS_TOKEN}`,
+      'cookie': `fandom_session=${FANDOM_ACCESS_TOKEN}`,
+      'X-Fandom-Auth': '1'
     },
   }).then(res => res.text());
 
